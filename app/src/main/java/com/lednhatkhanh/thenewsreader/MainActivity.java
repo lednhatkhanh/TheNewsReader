@@ -1,54 +1,54 @@
 package com.lednhatkhanh.thenewsreader;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.lednhatkhanh.thenewsreader.data.NewsContract;
 import com.lednhatkhanh.thenewsreader.databinding.ActivityMainBinding;
 import com.lednhatkhanh.thenewsreader.utils.DataUtils;
-import com.lednhatkhanh.thenewsreader.utils.NetworkUtils;
-import com.lednhatkhanh.thenewsreader.utils.PreferencesUtils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URL;
 import java.text.ParseException;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity
     implements NewsAdapter.NewsAdapterOnClickHandler,
-        LoaderCallbacks<JSONArray>,
-        SharedPreferences.OnSharedPreferenceChangeListener{
+        LoaderCallbacks<Cursor> {
 
     ActivityMainBinding mBinding;
     private NewsAdapter mNewsAdapter;
-    private static final int NEWS_LOADER_ID = 0;
+    private int mPosition = RecyclerView.NO_POSITION;
+
     private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final int NEWS_LOADER_ID = 44;
+    public static final String[] MAIN_NEWS_PROJECTION = {
+            NewsContract.NewsEntry.COLUMN_TITLE,
+            NewsContract.NewsEntry.COLUMN_AUTHOR,
+            NewsContract.NewsEntry.COLUMN_DESCRIPTION,
+            NewsContract.NewsEntry.COLUMN_URL,
+            NewsContract.NewsEntry.COLUMN_URL_TO_IMAGE,
+            NewsContract.NewsEntry.COLUMN_PUBLISHED_AT
+    };
+    public static final int INDEX_NEWS_TITLE = 0;
+    public static final int INDEX_NEWS_AUTHOR = 1;
+    public static final int INDEX_NEWS_DESCRIPTION = 2;
+    public static final int INDEX_NEWS_URL = 3;
+    public static final int INDEX_NEWS_URL_TO_IMAGE = 4;
+    public static final int INDEX_NEWS_PUBLISHED_AT = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,121 +61,52 @@ public class MainActivity extends AppCompatActivity
         mBinding.newsRecyclerView.setLayoutManager(linearLayoutManager);
         mBinding.newsRecyclerView.setHasFixedSize(true);
 
-        mNewsAdapter = new NewsAdapter(this);
+        mNewsAdapter = new NewsAdapter(this, this);
+        showLoading();
+
         mBinding.newsRecyclerView.setAdapter(mNewsAdapter);
 
-        int loaderId = NEWS_LOADER_ID;
-        LoaderCallbacks<JSONArray> callbacks = MainActivity.this;
+        LoaderCallbacks<Cursor> callbacks = MainActivity.this;
 
-        Bundle bundleForLoader = null;
-
-        getSupportLoaderManager().initLoader(loaderId, bundleForLoader, callbacks);
-
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .registerOnSharedPreferenceChangeListener(this);
+        getSupportLoaderManager().initLoader(NEWS_LOADER_ID, null, callbacks);
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        PREFERENCES_HAVE_BEEN_UPDATED = true;
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if(PREFERENCES_HAVE_BEEN_UPDATED) {
-            getSupportLoaderManager().restartLoader(NEWS_LOADER_ID, null, this);
-            PREFERENCES_HAVE_BEEN_UPDATED = false;
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+        switch (loaderId) {
+            case NEWS_LOADER_ID:
+                Uri newsQueryUri = NewsContract.NewsEntry.CONTENT_URI;
+                return new CursorLoader(this,
+                        newsQueryUri,
+                        MAIN_NEWS_PROJECTION,
+                        null,
+                        null,
+                        null);
+            default:
+                throw new RuntimeException("Loader Not Implemented: " + loaderId);
         }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mNewsAdapter.swapCursor(data);
 
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .unregisterOnSharedPreferenceChangeListener(this);
+        if(mPosition == RecyclerView.NO_POSITION) mPosition = 0;
+        mBinding.newsRecyclerView.smoothScrollToPosition(mPosition);
+
+        if(data.getCount() != 0) showResult();
     }
 
     @Override
-    public Loader<JSONArray> onCreateLoader(int id, Bundle args) {
-        return new AsyncTaskLoader<JSONArray>(this) {
-            JSONArray articlesJsonArray = null;
-
-            @Override
-            protected void onStartLoading() {
-                if(articlesJsonArray != null) {
-                    deliverResult(articlesJsonArray);
-                } else {
-                    showLoading();
-                    forceLoad();
-                }
-            }
-
-            @Override
-            public JSONArray loadInBackground() {
-                OkHttpClient client = new OkHttpClient();
-
-                String sourceParam = PreferencesUtils.getSource(MainActivity.this);
-                String sortByParam = PreferencesUtils.getSortBy(MainActivity.this);
-
-                Uri mNewsUri = new Uri.Builder()
-                        .scheme("https")
-                        .authority("newsapi.org")
-                        .appendPath("v1")
-                        .appendPath("articles")
-                        .appendQueryParameter("source", sourceParam)
-                        .appendQueryParameter("sortBy", sortByParam)
-                        .appendQueryParameter("apiKey", NetworkUtils.API_KEY)
-                        .build();
-                Log.i(LOG_TAG, mNewsUri.toString());
-
-                try {
-                    URL mNewsUrl = new URL(mNewsUri.toString());
-
-                    Request request = new Request.Builder()
-                            .url(mNewsUrl)
-                            .build();
-
-                    Response response = client.newCall(request).execute();
-                    JSONObject responseJsonObject = new JSONObject(response.body().string());
-                    return responseJsonObject.getJSONArray("articles");
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, e.getLocalizedMessage());
-                    return null;
-                } catch (JSONException e) {
-                    Log.e(LOG_TAG, e.getLocalizedMessage());
-                    return null;
-                }
-            }
-
-            @Override
-            public void deliverResult(JSONArray data) {
-                articlesJsonArray = data;
-                super.deliverResult(data);
-            }
-        };
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mNewsAdapter.swapCursor(null);
     }
 
     @Override
-    public void onLoadFinished(Loader<JSONArray> loader, JSONArray data) {
-        if(data == null) {
-            showError();
-        } else {
-            try {
-                mNewsAdapter.setArticlesList(DataUtils.convertArticlesJsonArrayToArrayList(data));
-                showResult();
-            } catch (JSONException | ParseException e) {
-                Log.e(LOG_TAG, e.getLocalizedMessage());
-                showError();
-            }
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<JSONArray> loader) {
-
+    public void onClick(String title) {
+        Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
+        startDetailActivityIntent.putExtra(Intent.EXTRA_TEXT, title);
+        startActivity(startDetailActivityIntent);
     }
 
     @Override
@@ -196,28 +127,13 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onClick(String title) {
-        Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
-        startDetailActivityIntent.putExtra(Intent.EXTRA_TEXT, title);
-        startActivity(startDetailActivityIntent);
-    }
-
     private void showLoading() {
-        mBinding.errorTextView.setVisibility(View.INVISIBLE);
         mBinding.loadingIndicator.setVisibility(View.VISIBLE);
         mBinding.newsRecyclerView.setVisibility(View.INVISIBLE);
     }
 
     private void showResult() {
-        mBinding.errorTextView.setVisibility(View.INVISIBLE);
         mBinding.loadingIndicator.setVisibility(View.INVISIBLE);
         mBinding.newsRecyclerView.setVisibility(View.VISIBLE);
-    }
-
-    private void showError() {
-        mBinding.errorTextView.setVisibility(View.VISIBLE);
-        mBinding.loadingIndicator.setVisibility(View.INVISIBLE);
-        mBinding.newsRecyclerView.setVisibility(View.INVISIBLE);
     }
 }

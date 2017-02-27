@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">TheNewsReader</string>
+    <string name="content_authority">com.lednhatkhanh.thenewsreader</string>
+    
     <string name="error_message">Something bad happened!</string>
 
     <string name="action_settings">Settings</string>

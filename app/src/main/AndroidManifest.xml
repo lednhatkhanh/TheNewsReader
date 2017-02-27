@@ -26,7 +26,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".SettingsActivity"></activity>
+        <activity android:name=".SettingsActivity"/>
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".data.NewsProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

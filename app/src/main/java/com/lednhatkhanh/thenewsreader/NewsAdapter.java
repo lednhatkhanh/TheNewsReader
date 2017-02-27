@@ -1,22 +1,18 @@
 package com.lednhatkhanh.thenewsreader;
 
-import android.content.ClipData.Item;
 import android.content.Context;
+import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.lednhatkhanh.thenewsreader.databinding.NewsListItemBinding;
 import com.lednhatkhanh.thenewsreader.models.Article;
 import com.lednhatkhanh.thenewsreader.utils.DataUtils;
 import com.squareup.picasso.Picasso;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 
 /**
@@ -25,40 +21,46 @@ import java.util.ArrayList;
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterViewHolder> {
 
-    private Context context;
-    private ArrayList<Article> mArticlesList;
+    private Context mContext;
+    private Cursor mCursor;
     private final NewsAdapterOnClickHandler mClickHandler;
     private static final String LOG_TAG = NewsAdapter.class.getSimpleName();
 
-    NewsAdapter(NewsAdapterOnClickHandler handler) {
+    NewsAdapter(Context context, NewsAdapterOnClickHandler handler) {
+        this.mContext = context;
         mClickHandler = handler;
     }
 
     @Override
     public NewsAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        context = viewGroup.getContext();
-
-        View view = LayoutInflater.from(context).inflate(R.layout.news_list_item, viewGroup, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.news_list_item, viewGroup, false);
+        view.setFocusable(true);
         return new NewsAdapterViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(NewsAdapterViewHolder newsAdapterViewHolder, int position) {
         NewsListItemBinding newsListItemBinding = newsAdapterViewHolder.getBinding();
-        Article articleAtPosition = mArticlesList.get(position);
+        mCursor.moveToPosition(position);
+
         String formattedTime;
 
-        formattedTime = DataUtils.getReadableDateFormat(articleAtPosition.getPublishedAt());
+        formattedTime = DataUtils
+                .getReadableDateFormat(mCursor.getLong(MainActivity.INDEX_NEWS_PUBLISHED_AT));
 
-        newsListItemBinding.articleTitleTextView.setText(articleAtPosition.getTitle());
-        newsListItemBinding.articleAuthorTextView.setText(articleAtPosition.getAuthor());
-        newsListItemBinding.articleDescriptionTextView.setText(articleAtPosition.getDescription());
+        newsListItemBinding.articleTitleTextView
+                .setText(mCursor.getString(MainActivity.INDEX_NEWS_TITLE));
+        newsListItemBinding.articleAuthorTextView
+                .setText(mCursor.getString(MainActivity.INDEX_NEWS_AUTHOR));
+        newsListItemBinding.articleDescriptionTextView
+                .setText(mCursor.getString(MainActivity.INDEX_NEWS_DESCRIPTION));
         newsListItemBinding.articlePublishedAtTextView.setText(formattedTime);
 
-        if(articleAtPosition.getUrlToImage() == null) {
+        if(mCursor.getString(MainActivity.INDEX_NEWS_URL_TO_IMAGE) == null) {
             newsListItemBinding.articleImageView.setVisibility(View.INVISIBLE);
         } else {
-            Picasso.with(context).load(articleAtPosition.getUrlToImage())
+            Picasso.with(mContext)
+                    .load(mCursor.getString(MainActivity.INDEX_NEWS_URL_TO_IMAGE))
                     .fit()
                     .centerCrop()
                     .into(newsListItemBinding.articleImageView);
@@ -67,11 +69,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
 
     @Override
     public int getItemCount() {
-        return mArticlesList == null ? 0 : mArticlesList.size();
+        return mCursor == null ? 0 : mCursor.getCount();
     }
 
-    void setArticlesList(ArrayList<Article> articlesList) {
-        this.mArticlesList = articlesList;
+    void swapCursor(Cursor cursor) {
+        mCursor = cursor;
         notifyDataSetChanged();
     }
 
@@ -95,9 +97,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
 
         @Override
         public void onClick(View v) {
-            int adapterPosition = getAdapterPosition();
-            String title = mArticlesList.get(adapterPosition).getTitle();
-            mClickHandler.onClick(title);
+            mClickHandler.onClick("Placeholder....");
         }
     }
 }

@@ -16,7 +16,6 @@
                 android:id="@+id/articleImageView"
                 android:layout_width="0dp"
                 android:layout_height="200dp"
-                android:background="@color/colorPrimary"
                 tools:ignore="ContentDescription"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
