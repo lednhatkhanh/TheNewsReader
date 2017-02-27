@@ -1,4 +1,19 @@
 <resources>
     <string name="app_name">TheNewsReader</string>
     <string name="error_message">Something bad happened!</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="pref_source_default">reddit-r-all</string>
+    <string name="pref_source_label">Source</string>
+    <string name="pref_source_key" translatable="false">source</string>
+    
+    <string name="pref_sortBy_label">Sort By</string>
+    <string name="pref_sortBy_key">sort_by</string>
+    <string name="pref_sortBy_label_top">Top</string>
+    <string name="pref_sortBy_top">top</string>
+    <string name="pref_sortBy_label_latest">Latest</string>
+    <string name="pref_sortBy_latest">latest</string>
+    <string name="pref_sortBy_label_popular">Popular</string>
+    <string name="pref_sortBy_popular">popular</string>
 </resources>
