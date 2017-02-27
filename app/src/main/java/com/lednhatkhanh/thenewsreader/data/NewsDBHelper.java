@@ -22,7 +22,7 @@ public class NewsDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_NEWS_TABLE = "CREATE TABLE "
                 + NewsEntry.TABLE_NAME + " ("
                 + NewsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + NewsEntry.COLUMN_TITLE + " TEXT NOT NULL, "
+                + NewsEntry.COLUMN_TITLE + " TEXT NOT NULL UNIQUE, "
                 + NewsEntry.COLUMN_AUTHOR + " TEXT NOT NULL, "
                 + NewsEntry.COLUMN_DESCRIPTION + " TEXT NOT NULL, "
                 + NewsEntry.COLUMN_URL + " TEXT NOT NULL, "
@@ -35,6 +35,7 @@ public class NewsDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS " + NewsEntry.TABLE_NAME + ";");
+        onCreate(db);
     }
 }
