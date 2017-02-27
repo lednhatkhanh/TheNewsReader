@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lednhatkhanh.thenewsreader.utils.DataUtils;
 import com.lednhatkhanh.thenewsreader.utils.NetworkUtils;
@@ -25,7 +26,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+    implements NewsAdapter.NewsAdapterOnClickHandler {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -49,10 +51,15 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.setHasFixedSize(true);
 
-        mNewsAdapter = new NewsAdapter();
+        mNewsAdapter = new NewsAdapter(this);
         mRecyclerView.setAdapter(mNewsAdapter);
 
         new FetchNewsTask().execute();
+    }
+
+    @Override
+    public void onClick(String title) {
+        Toast.makeText(this, title, Toast.LENGTH_SHORT).show();
     }
 
     private void showLoadingIndicator() {

@@ -24,9 +24,17 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
     private Context context;
     private ArrayList<Article> mArticlesList;
 
+    private final NewsAdapterOnClickHandler mClickHandler;
+
     private static final String LOG_TAG = NewsAdapter.class.getSimpleName();
 
-    public NewsAdapter() {}
+    public NewsAdapter(NewsAdapterOnClickHandler handler) {
+        mClickHandler = handler;
+    }
+
+    public interface NewsAdapterOnClickHandler {
+        void onClick(String title);
+    }
 
     @Override
     public NewsAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
@@ -73,7 +81,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
         notifyDataSetChanged();
     }
 
-    public class NewsAdapterViewHolder extends RecyclerView.ViewHolder {
+    public class NewsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public final TextView mArticleTitleTextView;
         public final TextView mArticleAuthorTextView;
         public final TextView mArticleDescriptionTextView;
@@ -90,6 +98,15 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
             mArticlePublishedAtTextView = (TextView) view.findViewById(R.id.articlePublishedAtTextView);
 
             mArticleImageView = (ImageView) view.findViewById(R.id.articleImageView);
+
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            String title = mArticlesList.get(adapterPosition).getTitle();
+            mClickHandler.onClick(title);
         }
     }
 }
