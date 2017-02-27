@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -13,7 +14,7 @@
         <ImageView
             android:id="@+id/articleImageView"
             android:layout_width="0dp"
-            android:layout_height="100dp"
+            android:layout_height="200dp"
             android:background="@color/colorPrimary"
             tools:ignore="ContentDescription"
             app:layout_constraintTop_toTopOf="parent"
@@ -30,7 +31,6 @@
             android:layout_marginTop="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:text="Title is here"
             android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
         <TextView
@@ -39,7 +39,6 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/articleTitleTextView"
             app:layout_constraintLeft_toLeftOf="@id/articleTitleTextView"
-            android:text="Author is here"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
         <TextView
@@ -49,7 +48,6 @@
             app:layout_constraintTop_toBottomOf="@id/articleAuthorTextView"
             app:layout_constraintLeft_toLeftOf="@id/articleTitleTextView"
             app:layout_constraintRight_toRightOf="@id/articleTitleTextView"
-            android:text="Description goes here and long long long long long long long long long long long long long log lonasdasdsadsadsadasdasdsa"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
         <TextView
@@ -58,9 +56,8 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/articleDescriptionTextView"
             app:layout_constraintRight_toRightOf="parent"
-            android:text="Time goes here"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
-            android:layout_marginRight="8dp"/>
+            android:layout_marginEnd="8dp"/>
 
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>

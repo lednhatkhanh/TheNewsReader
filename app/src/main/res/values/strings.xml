@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TheNewsReader</string>
+    <string name="error_message">Something bad happened!</string>
 </resources>

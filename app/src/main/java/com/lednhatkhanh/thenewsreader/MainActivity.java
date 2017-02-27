@@ -4,8 +4,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import com.lednhatkhanh.thenewsreader.utils.DataUtils;
 import com.lednhatkhanh.thenewsreader.utils.NetworkUtils;
 
 import org.json.JSONArray;
@@ -13,7 +19,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import okhttp3.OkHttpClient;
@@ -24,18 +29,54 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
+    private RecyclerView mRecyclerView;
+    private ProgressBar mLoadingIndicator;
+    private TextView mErrorTextView;
+
+    private NewsAdapter mNewsAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mRecyclerView = (RecyclerView) findViewById(R.id.newsRecyclerView);
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.loadingIndicator);
+        mErrorTextView = (TextView) findViewById(R.id.errorTextView);
+
+        LinearLayoutManager linearLayoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setHasFixedSize(true);
+
+        mNewsAdapter = new NewsAdapter();
+        mRecyclerView.setAdapter(mNewsAdapter);
+
         new FetchNewsTask().execute();
+    }
+
+    private void showLoadingIndicator() {
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorTextView.setVisibility(View.INVISIBLE);
+    }
+
+    private void showResult() {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        mErrorTextView.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    private void showError() {
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorTextView.setVisibility(View.VISIBLE);
     }
 
     private class FetchNewsTask extends AsyncTask<Void, Void, JSONArray> {
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
+            showLoadingIndicator();
         }
 
         @Override
@@ -64,9 +105,11 @@ public class MainActivity extends AppCompatActivity {
                 return responseJsonObject.getJSONArray("articles");
             } catch (IOException e) {
                 Log.e(LOG_TAG, e.getLocalizedMessage());
+                showError();
                 return null;
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getLocalizedMessage());
+                showError();
                 return null;
             }
         }
@@ -76,6 +119,14 @@ public class MainActivity extends AppCompatActivity {
             if(jsonArray == null) return;
 
             Log.i(LOG_TAG, jsonArray.toString());
+
+            try {
+                mNewsAdapter.setArticlesList(DataUtils.convertArticlesJsonArrayToArrayList(jsonArray));
+                showResult();
+            } catch (JSONException e) {
+                e.printStackTrace();
+                showError();
+            }
         }
     }
 }
