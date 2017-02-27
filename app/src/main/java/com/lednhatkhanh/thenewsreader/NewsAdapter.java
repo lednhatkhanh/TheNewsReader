@@ -1,6 +1,8 @@
 package com.lednhatkhanh.thenewsreader;
 
+import android.content.ClipData.Item;
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.lednhatkhanh.thenewsreader.databinding.NewsListItemBinding;
 import com.lednhatkhanh.thenewsreader.models.Article;
 import com.lednhatkhanh.thenewsreader.utils.DataUtils;
 import com.squareup.picasso.Picasso;
@@ -28,11 +31,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
 
     private static final String LOG_TAG = NewsAdapter.class.getSimpleName();
 
-    public NewsAdapter(NewsAdapterOnClickHandler handler) {
+    NewsAdapter(NewsAdapterOnClickHandler handler) {
         mClickHandler = handler;
     }
 
-    public interface NewsAdapterOnClickHandler {
+    interface NewsAdapterOnClickHandler {
         void onClick(String title);
     }
 
@@ -46,6 +49,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
 
     @Override
     public void onBindViewHolder(NewsAdapterViewHolder newsAdapterViewHolder, int position) {
+        NewsListItemBinding newsListItemBinding = newsAdapterViewHolder.getBinding();
         Article articleAtPosition = mArticlesList.get(position);
         String formattedTime;
 
@@ -57,17 +61,19 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
             return;
         }
 
-        newsAdapterViewHolder.mArticleTitleTextView.setText(articleAtPosition.getTitle());
-        newsAdapterViewHolder.mArticleAuthorTextView.setText(articleAtPosition.getAuthor());
-        newsAdapterViewHolder.mArticleDescriptionTextView.setText(articleAtPosition.getDescription());
-        newsAdapterViewHolder.mArticlePublishedAtTextView.setText(formattedTime);
+
+        newsListItemBinding.articleTitleTextView.setText(articleAtPosition.getTitle());
+        newsListItemBinding.articleAuthorTextView.setText(articleAtPosition.getAuthor());
+        newsListItemBinding.articleDescriptionTextView.setText(articleAtPosition.getDescription());
+        newsListItemBinding.articlePublishedAtTextView.setText(formattedTime);
+
         if(articleAtPosition.getUrlToImage() == null) {
-            newsAdapterViewHolder.mArticleImageView.setVisibility(View.INVISIBLE);
+            newsListItemBinding.articleImageView.setVisibility(View.INVISIBLE);
         } else {
             Picasso.with(context).load(articleAtPosition.getUrlToImage())
                     .fit()
                     .centerCrop()
-                    .into(newsAdapterViewHolder.mArticleImageView);
+                    .into(newsListItemBinding.articleImageView);
         }
     }
 
@@ -76,30 +82,25 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
         return mArticlesList == null ? 0 : mArticlesList.size();
     }
 
-    public void setArticlesList(ArrayList<Article> articlesList) {
+    void setArticlesList(ArrayList<Article> articlesList) {
         this.mArticlesList = articlesList;
         notifyDataSetChanged();
     }
 
-    public class NewsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public final TextView mArticleTitleTextView;
-        public final TextView mArticleAuthorTextView;
-        public final TextView mArticleDescriptionTextView;
-        public final TextView mArticlePublishedAtTextView;
+    class NewsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public final ImageView mArticleImageView;
+        NewsListItemBinding mBinding;
 
-        public NewsAdapterViewHolder(View view) {
+        NewsAdapterViewHolder(View view) {
             super(view);
 
-            mArticleTitleTextView = (TextView) view.findViewById(R.id.articleTitleTextView);
-            mArticleAuthorTextView = (TextView) view.findViewById(R.id.articleAuthorTextView);
-            mArticleDescriptionTextView = (TextView) view.findViewById(R.id.articleDescriptionTextView);
-            mArticlePublishedAtTextView = (TextView) view.findViewById(R.id.articlePublishedAtTextView);
+            mBinding = DataBindingUtil.bind(view);
 
-            mArticleImageView = (ImageView) view.findViewById(R.id.articleImageView);
+            mBinding.getRoot().setOnClickListener(this);
+        }
 
-            view.setOnClickListener(this);
+        NewsListItemBinding getBinding() {
+            return mBinding;
         }
 
         @Override
