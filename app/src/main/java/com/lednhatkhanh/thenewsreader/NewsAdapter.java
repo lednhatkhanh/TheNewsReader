@@ -24,19 +24,14 @@ import java.util.ArrayList;
  */
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterViewHolder> {
+
     private Context context;
     private ArrayList<Article> mArticlesList;
-
     private final NewsAdapterOnClickHandler mClickHandler;
-
     private static final String LOG_TAG = NewsAdapter.class.getSimpleName();
 
     NewsAdapter(NewsAdapterOnClickHandler handler) {
         mClickHandler = handler;
-    }
-
-    interface NewsAdapterOnClickHandler {
-        void onClick(String title);
     }
 
     @Override
@@ -87,15 +82,17 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
         notifyDataSetChanged();
     }
 
+    interface NewsAdapterOnClickHandler {
+        void onClick(String title);
+    }
+
     class NewsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         NewsListItemBinding mBinding;
 
         NewsAdapterViewHolder(View view) {
             super(view);
-
             mBinding = DataBindingUtil.bind(view);
-
             mBinding.getRoot().setOnClickListener(this);
         }
 

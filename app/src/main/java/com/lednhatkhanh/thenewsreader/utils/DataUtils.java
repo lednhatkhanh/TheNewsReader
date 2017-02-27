@@ -16,6 +16,7 @@ import java.util.Locale;
  */
 
 public class DataUtils {
+
     public static ArrayList<Article> convertArticlesJsonArrayToArrayList(JSONArray articleJsonArray)
             throws JSONException {
         ArrayList<Article> articlesArrayList = new ArrayList<>();

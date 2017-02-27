@@ -1,5 +1,6 @@
 package com.lednhatkhanh.thenewsreader;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -38,7 +39,6 @@ public class MainActivity extends AppCompatActivity
 
     ActivityMainBinding mBinding;
     private NewsAdapter mNewsAdapter;
-
     private static final int NEWS_LOADER_ID = 0;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -144,7 +144,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClick(String title) {
-        Toast.makeText(this, title, Toast.LENGTH_SHORT).show();
+        Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
+        startDetailActivityIntent.putExtra(Intent.EXTRA_TEXT, title);
+        startActivity(startDetailActivityIntent);
     }
 
     private void showResult() {
