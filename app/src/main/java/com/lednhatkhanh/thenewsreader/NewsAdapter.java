@@ -48,14 +48,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
         Article articleAtPosition = mArticlesList.get(position);
         String formattedTime;
 
-        try {
-            formattedTime = DataUtils.convertUTCToLocalTime(articleAtPosition.getPublishedAt());
-        } catch (ParseException e) {
-            e.printStackTrace();
-            Log.e(LOG_TAG, e.getLocalizedMessage());
-            return;
-        }
-
+        formattedTime = DataUtils.getReadableDateFormat(articleAtPosition.getPublishedAt());
 
         newsListItemBinding.articleTitleTextView.setText(articleAtPosition.getTitle());
         newsListItemBinding.articleAuthorTextView.setText(articleAtPosition.getAuthor());

@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -18,7 +19,7 @@ import java.util.Locale;
 public class DataUtils {
 
     public static ArrayList<Article> convertArticlesJsonArrayToArrayList(JSONArray articleJsonArray)
-            throws JSONException {
+            throws JSONException, ParseException {
         ArrayList<Article> articlesArrayList = new ArrayList<>();
 
         for(int i=0;i< articleJsonArray.length(); i++) {
@@ -28,7 +29,7 @@ public class DataUtils {
             String description = articleJsonObject.getString("description");
             String url = articleJsonObject.getString("url");
             String urlToImage = articleJsonObject.getString("urlToImage");
-            String publishedAt = articleJsonObject.getString("publishedAt");
+            long publishedAt = convertDateTimeToNumber(articleJsonObject.getString("publishedAt"));
 
             articlesArrayList.add(new Article(title, author, description, url, urlToImage, publishedAt));
         }
@@ -36,9 +37,13 @@ public class DataUtils {
         return articlesArrayList;
     }
 
-    public static String convertUTCToLocalTime(String rawTime) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    public static long convertDateTimeToNumber(String rawTime) throws ParseException {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                .parse(rawTime).getTime();
+    }
+
+    public static String getReadableDateFormat(long timeInMillis) {
         return new SimpleDateFormat("HH:mm MM-dd-YYYY", Locale.getDefault())
-                .format(dateFormat.parse(rawTime));
+                .format(new Date(timeInMillis));
     }
 }

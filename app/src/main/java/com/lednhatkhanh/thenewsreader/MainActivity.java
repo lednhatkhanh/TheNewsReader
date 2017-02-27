@@ -33,6 +33,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity
             try {
                 mNewsAdapter.setArticlesList(DataUtils.convertArticlesJsonArrayToArrayList(data));
                 showResult();
-            } catch (JSONException e) {
+            } catch (JSONException | ParseException e) {
                 Log.e(LOG_TAG, e.getLocalizedMessage());
                 showError();
             }

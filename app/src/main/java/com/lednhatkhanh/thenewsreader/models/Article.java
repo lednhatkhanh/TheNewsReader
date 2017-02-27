@@ -10,15 +10,16 @@ public class Article {
     private String description;
     private String url;
     private String urlToImage;
-    private String publishedAt;
+    private long publishedAt;
 
     public Article() {
         title = author = description = url
-                = urlToImage = publishedAt = null;
+                = urlToImage = null;
+        publishedAt = 0;
     }
 
     public Article(String title, String author, String description,
-                   String url, String urlToImage, String publishedAt) {
+                   String url, String urlToImage, long publishedAt) {
         this.title = title;
         this.author = author;
         this.description = description;
@@ -67,11 +68,11 @@ public class Article {
         this.urlToImage = urlToImage;
     }
 
-    public String getPublishedAt() {
+    public long getPublishedAt() {
         return publishedAt;
     }
 
-    public void setPublishedAt(String publishedAt) {
+    public void setPublishedAt(long publishedAt) {
         this.publishedAt = publishedAt;
     }
 }
