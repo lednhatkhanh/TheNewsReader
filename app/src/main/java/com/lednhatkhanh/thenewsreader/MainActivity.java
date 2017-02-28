@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity
 
         getSupportLoaderManager().initLoader(NEWS_LOADER_ID, null, this);
 
-        NewsSyncUtils.startSynching(this);
+        NewsSyncUtils.initialize(this);
     }
 
     @Override

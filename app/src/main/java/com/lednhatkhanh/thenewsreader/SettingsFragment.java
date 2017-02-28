@@ -10,8 +10,6 @@ import android.support.v7.preference.PreferenceScreen;
 
 import com.lednhatkhanh.thenewsreader.sync.NewsSyncUtils;
 
-import java.util.List;
-
 /**
  * Created by lednh on 2/27/2017.
  */
@@ -58,7 +56,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
             }
 
-            NewsSyncUtils.startSynching(getActivity());
+            NewsSyncUtils.startImmediateSync(getActivity());
         }
     }
 
