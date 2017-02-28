@@ -4,13 +4,11 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import com.lednhatkhanh.thenewsreader.utils.DataUtils;
+import android.util.Log;
 
 /**
  * Created by lednh on 2/27/2017.
@@ -29,8 +27,8 @@ public class NewsProvider extends ContentProvider {
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = NewsContract.CONTENT_AUTHORITY;
 
-        uriMatcher.addURI(authority, NewsContract.PATH_NEWS, CODE_NEWS);
-        uriMatcher.addURI(authority, NewsContract.PATH_NEWS + "?title=*", CODE_NEWS_WITH_TITLE);
+        uriMatcher.addURI(authority, NewsContract.PATH_ARTICLE, CODE_NEWS);
+        uriMatcher.addURI(authority, NewsContract.PATH_ARTICLE + "?title=*", CODE_NEWS_WITH_TITLE);
 
         return uriMatcher;
     }
@@ -44,12 +42,14 @@ public class NewsProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
         Cursor cursor;
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
         switch (sUriMatcher.match(uri)) {
             case CODE_NEWS:
-                cursor = mOpenHelper.getReadableDatabase().query(
+                cursor = db.query(
                         NewsContract.NewsEntry.TABLE_NAME,
                         projection,
                         selection,
@@ -60,7 +60,7 @@ public class NewsProvider extends ContentProvider {
                 break;
             case CODE_NEWS_WITH_TITLE:
                 String title = uri.getQueryParameter("title");
-                cursor = mOpenHelper.getReadableDatabase().query(
+                cursor = db.query(
                         NewsContract.NewsEntry.TABLE_NAME,
                         projection,
                         NewsContract.NewsEntry.COLUMN_TITLE + " = ? ",
@@ -100,14 +100,17 @@ public class NewsProvider extends ContentProvider {
 
                 try {
                     for(ContentValues value: values) {
+                        Log.i("VALUE", value.getAsString(NewsContract.NewsEntry.COLUMN_TITLE));
                         long _id = db.insert(NewsContract.NewsEntry.TABLE_NAME, null, value);
                         if(_id != -1) ++rowsInserted;
                     }
+                    db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
                 }
 
                 if(rowsInserted > 0) {
+                    Log.i("DATA", "INSERTED " + rowsInserted);
                     getContext().getContentResolver().notifyChange(uri, null);
                 }
 
@@ -119,7 +122,25 @@ public class NewsProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        int rowsDeleted;
+
+        if(selection == null) {
+            selection = "1";
+        }
+        switch (sUriMatcher.match(uri)) {
+            case CODE_NEWS:
+                rowsDeleted = mOpenHelper.getWritableDatabase()
+                        .delete(NewsContract.NewsEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        if(rowsDeleted > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return rowsDeleted;
     }
 
     @Override

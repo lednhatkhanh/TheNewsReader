@@ -1,5 +1,7 @@
 package com.lednhatkhanh.thenewsreader.utils;
 
+import android.util.Log;
+
 import com.lednhatkhanh.thenewsreader.models.Article;
 
 import org.json.JSONArray;
@@ -37,13 +39,13 @@ public class DataUtils {
         return articlesArrayList;
     }
 
-    public static long convertDateTimeToNumber(String rawTime) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    static long convertDateTimeToNumber(String rawTime) throws ParseException {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
                 .parse(rawTime).getTime();
     }
 
     public static String getReadableDateFormat(long timeInMillis) {
-        return new SimpleDateFormat("HH:mm MM-dd-YYYY", Locale.getDefault())
+        return new SimpleDateFormat("HH:mm MM-dd-yyyy", Locale.getDefault())
                 .format(new Date(timeInMillis));
     }
 }

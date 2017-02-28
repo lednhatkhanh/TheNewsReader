@@ -11,6 +11,7 @@ import com.lednhatkhanh.thenewsreader.R;
  */
 
 public class PreferencesUtils {
+
     public static String getSource(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(context);

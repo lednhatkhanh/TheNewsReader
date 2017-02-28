@@ -8,6 +8,8 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 
+import com.lednhatkhanh.thenewsreader.sync.NewsSyncUtils;
+
 import java.util.List;
 
 /**
@@ -55,6 +57,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
             if(!(preference instanceof CheckBoxPreference)) {
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
             }
+
+            NewsSyncUtils.startSynching(getActivity());
         }
     }
 

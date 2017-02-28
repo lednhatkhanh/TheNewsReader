@@ -12,15 +12,15 @@ public class NewsContract {
     public static final String CONTENT_AUTHORITY = "com.lednhatkhanh.thenewsreader";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public static final String PATH_NEWS = "news";
+    public static final String PATH_ARTICLE = "articles";
 
     public static final class NewsEntry implements BaseColumns {
 
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-                .appendPath(PATH_NEWS)
+                .appendPath(PATH_ARTICLE)
                 .build();
 
-        public static final String TABLE_NAME = "news";
+        public static final String TABLE_NAME = "article";
 
         public static final String COLUMN_TITLE = "title";
         public static final String COLUMN_AUTHOR = "author";

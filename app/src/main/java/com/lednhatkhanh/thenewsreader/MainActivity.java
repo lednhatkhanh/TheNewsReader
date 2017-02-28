@@ -18,6 +18,7 @@ import android.view.View;
 
 import com.lednhatkhanh.thenewsreader.data.NewsContract;
 import com.lednhatkhanh.thenewsreader.databinding.ActivityMainBinding;
+import com.lednhatkhanh.thenewsreader.sync.NewsSyncUtils;
 import com.lednhatkhanh.thenewsreader.utils.DataUtils;
 
 import org.json.JSONException;
@@ -62,13 +63,13 @@ public class MainActivity extends AppCompatActivity
         mBinding.newsRecyclerView.setHasFixedSize(true);
 
         mNewsAdapter = new NewsAdapter(this, this);
-        showLoading();
-
         mBinding.newsRecyclerView.setAdapter(mNewsAdapter);
 
-        LoaderCallbacks<Cursor> callbacks = MainActivity.this;
+        showLoading();
 
-        getSupportLoaderManager().initLoader(NEWS_LOADER_ID, null, callbacks);
+        getSupportLoaderManager().initLoader(NEWS_LOADER_ID, null, this);
+
+        NewsSyncUtils.startSynching(this);
     }
 
     @Override
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity
         switch (loaderId) {
             case NEWS_LOADER_ID:
                 Uri newsQueryUri = NewsContract.NewsEntry.CONTENT_URI;
+                Log.i("DATA", newsQueryUri.toString());
                 return new CursorLoader(this,
                         newsQueryUri,
                         MAIN_NEWS_PROJECTION,
