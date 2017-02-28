@@ -6,6 +6,7 @@
     <string name="unknown_author">Unknown</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_share">Share</string>
 
     <string name="pref_source_default">the-next-web</string>
     <string name="pref_source_label">Source</string>

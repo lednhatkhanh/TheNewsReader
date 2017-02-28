@@ -5,11 +5,14 @@ import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -43,6 +46,7 @@ public class DetailActivity extends AppCompatActivity
     private static final int ID_DETAIL_LOADER = 353;
     private Uri mUri;
     private String urlToFullArticle;
+    private String mShareString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,16 +76,20 @@ public class DetailActivity extends AppCompatActivity
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if(data != null && data.moveToFirst()) {
             Log.i("DATA", data.getString(INDEX_ARTICLE_URL_TO_IMAGE));
-            String fomattedTime = DataUtils.getReadableDateFormat(
+
+            String title = data.getString(INDEX_ARTICLE_TITLE);
+            String author = data.getString(INDEX_ARTICLE_AUTHOR);
+            mShareString = title + " by " + author;
+            String formattedTime = DataUtils.getReadableDateFormat(
                     data.getLong(INDEX_ARTICLE_PUBLISHED_AT));
 
             Picasso.with(this).load(data.getString(INDEX_ARTICLE_URL_TO_IMAGE))
                     .fit()
                     .centerCrop()
                     .into(mBinding.articleDetailImageView);
-            mBinding.articleDetailTitleTextView.setText(data.getString(INDEX_ARTICLE_TITLE));
-            mBinding.articleDetailAuthorTextView.setText(data.getString(INDEX_ARTICLE_AUTHOR));
-            mBinding.articleDetailPublishedAtTextView.setText(fomattedTime);
+            mBinding.articleDetailTitleTextView.setText(title);
+            mBinding.articleDetailAuthorTextView.setText(author);
+            mBinding.articleDetailPublishedAtTextView.setText(formattedTime);
             mBinding.articleDetailDescriptionTextView.setText(data.getString(INDEX_ARTICLE_DESCRIPTION));
             urlToFullArticle = data.getString(INDEX_ARTICLE_URL);
         } else {
@@ -100,5 +108,35 @@ public class DetailActivity extends AppCompatActivity
         if(id == mBinding.articleDetailUrlTextView.getId()) {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(urlToFullArticle)));
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_detail, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if(id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        } else if (id == R.id.action_share) {
+            startActivity(createShareIntent());
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private Intent createShareIntent() {
+        Intent shareIntent = ShareCompat.IntentBuilder.from(this)
+                .setType("text/plain")
+                .setText(mShareString + " #TheNewsReader")
+                .getIntent();
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        return shareIntent;
     }
 }
