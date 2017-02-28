@@ -17,7 +17,7 @@ import android.util.Log;
 public class NewsProvider extends ContentProvider {
 
     public static final int CODE_NEWS = 100;
-    public static final int CODE_NEWS_WITH_TITLE = 101;
+    public static final int CODE_NEWS_WITH_ID = 101;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -28,7 +28,7 @@ public class NewsProvider extends ContentProvider {
         final String authority = NewsContract.CONTENT_AUTHORITY;
 
         uriMatcher.addURI(authority, NewsContract.PATH_ARTICLE, CODE_NEWS);
-        uriMatcher.addURI(authority, NewsContract.PATH_ARTICLE + "?title=*", CODE_NEWS_WITH_TITLE);
+        uriMatcher.addURI(authority, NewsContract.PATH_ARTICLE + "/#", CODE_NEWS_WITH_ID);
 
         return uriMatcher;
     }
@@ -45,11 +45,12 @@ public class NewsProvider extends ContentProvider {
     public Cursor query(@NonNull Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         Cursor cursor;
-        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+
+        //Log.i("MATCHER", "" + sUriMatcher.match(NewsContract.NewsEntry.buildUriWithId("Simple")));
 
         switch (sUriMatcher.match(uri)) {
-            case CODE_NEWS:
-                cursor = db.query(
+            case CODE_NEWS: {
+                cursor = mOpenHelper.getReadableDatabase().query(
                         NewsContract.NewsEntry.TABLE_NAME,
                         projection,
                         selection,
@@ -58,17 +59,20 @@ public class NewsProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
-            case CODE_NEWS_WITH_TITLE:
-                String title = uri.getQueryParameter("title");
-                cursor = db.query(
+            }
+            case CODE_NEWS_WITH_ID: {
+                String _id = uri.getLastPathSegment();
+                String[] selectionId = new String[]{_id};
+                cursor = mOpenHelper.getReadableDatabase().query(
                         NewsContract.NewsEntry.TABLE_NAME,
                         projection,
-                        NewsContract.NewsEntry.COLUMN_TITLE + " = ? ",
-                        new String[]{title},
+                        NewsContract.NewsEntry._ID + "=?",
+                        selectionId,
                         null,
                         null,
-                        sortOrder);
+                        null);
                 break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -100,7 +104,6 @@ public class NewsProvider extends ContentProvider {
 
                 try {
                     for(ContentValues value: values) {
-                        Log.i("VALUE", value.getAsString(NewsContract.NewsEntry.COLUMN_TITLE));
                         long _id = db.insert(NewsContract.NewsEntry.TABLE_NAME, null, value);
                         if(_id != -1) ++rowsInserted;
                     }
@@ -110,7 +113,6 @@ public class NewsProvider extends ContentProvider {
                 }
 
                 if(rowsInserted > 0) {
-                    Log.i("DATA", "INSERTED " + rowsInserted);
                     getContext().getContentResolver().notifyChange(uri, null);
                 }
 

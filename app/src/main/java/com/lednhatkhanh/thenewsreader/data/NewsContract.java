@@ -29,9 +29,9 @@ public class NewsContract {
         public static final String COLUMN_URL_TO_IMAGE = "urlToImage";
         public static final String COLUMN_PUBLISHED_AT = "publishedAt";
 
-        public static Uri buildUriWithTitle(String title) {
+        public static Uri buildUriWithId(long _id) {
             return CONTENT_URI.buildUpon()
-                    .appendQueryParameter("title", title)
+                    .appendPath(Long.toString(_id))
                     .build();
         }
     }

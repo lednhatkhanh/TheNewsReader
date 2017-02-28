@@ -9,11 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.lednhatkhanh.thenewsreader.databinding.NewsListItemBinding;
-import com.lednhatkhanh.thenewsreader.models.Article;
 import com.lednhatkhanh.thenewsreader.utils.DataUtils;
 import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
 
 /**
  * Created by lednh on 2/27/2017.
@@ -44,23 +41,32 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
         mCursor.moveToPosition(position);
 
         String formattedTime;
+        String author;
 
         formattedTime = DataUtils
-                .getReadableDateFormat(mCursor.getLong(MainActivity.INDEX_NEWS_PUBLISHED_AT));
+                .getReadableDateFormat(mCursor.getLong(MainActivity.INDEX_ARTICLE_PUBLISHED_AT));
+        author = mCursor.getString(MainActivity.INDEX_ARTICLE_AUTHOR);
 
         newsListItemBinding.articleTitleTextView
-                .setText(mCursor.getString(MainActivity.INDEX_NEWS_TITLE));
-        newsListItemBinding.articleAuthorTextView
-                .setText(mCursor.getString(MainActivity.INDEX_NEWS_AUTHOR));
+                .setText(mCursor.getString(MainActivity.INDEX_ARTICLE_TITLE));
+        if(author == null || author.isEmpty() || author.equals("null")) {
+            newsListItemBinding.articleAuthorTextView
+                    .setText(mContext.getResources().getString(R.string.unknown_author));
+        } else {
+            newsListItemBinding.articleAuthorTextView
+                    .setText(author);
+        }
+
         newsListItemBinding.articleDescriptionTextView
-                .setText(mCursor.getString(MainActivity.INDEX_NEWS_DESCRIPTION));
+                .setText(mCursor.getString(MainActivity.INDEX_ARTICLE_DESCRIPTION));
         newsListItemBinding.articlePublishedAtTextView.setText(formattedTime);
 
-        if(mCursor.getString(MainActivity.INDEX_NEWS_URL_TO_IMAGE) == null) {
+        if(mCursor.getString(MainActivity.INDEX_ARTICLE_URL_TO_IMAGE) == null
+                || mCursor.getString(MainActivity.INDEX_ARTICLE_URL_TO_IMAGE).isEmpty()) {
             newsListItemBinding.articleImageView.setVisibility(View.INVISIBLE);
         } else {
             Picasso.with(mContext)
-                    .load(mCursor.getString(MainActivity.INDEX_NEWS_URL_TO_IMAGE))
+                    .load(mCursor.getString(MainActivity.INDEX_ARTICLE_URL_TO_IMAGE))
                     .fit()
                     .centerCrop()
                     .into(newsListItemBinding.articleImageView);
@@ -78,7 +84,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
     }
 
     interface NewsAdapterOnClickHandler {
-        void onClick(String title);
+        void onClick(long _id);
     }
 
     class NewsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -97,7 +103,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsAdapterVie
 
         @Override
         public void onClick(View v) {
-            mClickHandler.onClick("Placeholder....");
+            mCursor.moveToPosition(getAdapterPosition());
+
+            long _id = mCursor.getLong(MainActivity.INDEX_ARTICLE_ID);
+
+            mClickHandler.onClick(_id);
         }
     }
 }

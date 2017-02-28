@@ -19,11 +19,6 @@ import android.view.View;
 import com.lednhatkhanh.thenewsreader.data.NewsContract;
 import com.lednhatkhanh.thenewsreader.databinding.ActivityMainBinding;
 import com.lednhatkhanh.thenewsreader.sync.NewsSyncUtils;
-import com.lednhatkhanh.thenewsreader.utils.DataUtils;
-
-import org.json.JSONException;
-
-import java.text.ParseException;
 
 public class MainActivity extends AppCompatActivity
     implements NewsAdapter.NewsAdapterOnClickHandler,
@@ -33,23 +28,22 @@ public class MainActivity extends AppCompatActivity
     private NewsAdapter mNewsAdapter;
     private int mPosition = RecyclerView.NO_POSITION;
 
-    private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int NEWS_LOADER_ID = 44;
-    public static final String[] MAIN_NEWS_PROJECTION = {
+    public static final String[] MAIN_ARTICLE_PROJECTION = {
+            NewsContract.NewsEntry._ID,
             NewsContract.NewsEntry.COLUMN_TITLE,
             NewsContract.NewsEntry.COLUMN_AUTHOR,
             NewsContract.NewsEntry.COLUMN_DESCRIPTION,
-            NewsContract.NewsEntry.COLUMN_URL,
             NewsContract.NewsEntry.COLUMN_URL_TO_IMAGE,
             NewsContract.NewsEntry.COLUMN_PUBLISHED_AT
     };
-    public static final int INDEX_NEWS_TITLE = 0;
-    public static final int INDEX_NEWS_AUTHOR = 1;
-    public static final int INDEX_NEWS_DESCRIPTION = 2;
-    public static final int INDEX_NEWS_URL = 3;
-    public static final int INDEX_NEWS_URL_TO_IMAGE = 4;
-    public static final int INDEX_NEWS_PUBLISHED_AT = 5;
+    public static final int INDEX_ARTICLE_ID = 0;
+    public static final int INDEX_ARTICLE_TITLE = 1;
+    public static final int INDEX_ARTICLE_AUTHOR = 2;
+    public static final int INDEX_ARTICLE_DESCRIPTION = 3;
+    public static final int INDEX_ARTICLE_URL_TO_IMAGE = 4;
+    public static final int INDEX_ARTICLE_PUBLISHED_AT = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +74,7 @@ public class MainActivity extends AppCompatActivity
                 Log.i("DATA", newsQueryUri.toString());
                 return new CursorLoader(this,
                         newsQueryUri,
-                        MAIN_NEWS_PROJECTION,
+                        MAIN_ARTICLE_PROJECTION,
                         null,
                         null,
                         null);
@@ -105,9 +99,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onClick(String title) {
+    public void onClick(long _id) {
         Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
-        startDetailActivityIntent.putExtra(Intent.EXTRA_TEXT, title);
+        Uri uri = NewsContract.NewsEntry.buildUriWithId(_id);
+        startDetailActivityIntent.setData(uri);
         startActivity(startDetailActivityIntent);
     }
 

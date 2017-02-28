@@ -3,10 +3,11 @@
     <string name="content_authority">com.lednhatkhanh.thenewsreader</string>
     
     <string name="error_message">Something bad happened!</string>
+    <string name="unknown_author">Unknown</string>
 
     <string name="action_settings">Settings</string>
 
-    <string name="pref_source_default">reddit-r-all</string>
+    <string name="pref_source_default">the-next-web</string>
     <string name="pref_source_label">Source</string>
     <string name="pref_source_key" translatable="false">source</string>
     
