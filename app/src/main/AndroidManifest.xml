@@ -33,6 +33,12 @@
             android:exported="false"/>
         <service android:name=".sync.NewsSyncIntentService"
             android:exported="false" />
+        <service android:name=".sync.NewsFirebaseJobService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
