@@ -93,11 +93,19 @@ public class MainActivity extends AppCompatActivity
         if(data.getCount() != 0) showResult();
     }
 
+    /**
+     *
+     * @param loader th
+     */
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mNewsAdapter.swapCursor(null);
     }
 
+    /**
+     * Handle item clicking
+     * @param _id Id of the item that was clicked
+     */
     @Override
     public void onClick(long _id) {
         Intent startDetailActivityIntent = new Intent(this, DetailActivity.class);
@@ -106,12 +114,22 @@ public class MainActivity extends AppCompatActivity
         startActivity(startDetailActivityIntent);
     }
 
+    /**
+     * Inflate the menu layout file
+     * @param menu The menu that will be inflated
+     * @return true after inflating that menu
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
+    /**
+     * Handle the menu click action
+     * @param item The menu item that was clicked
+     * @return True if the item is one valid
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -124,11 +142,17 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Hide the RecyclerView and show the Progressbar
+     */
     private void showLoading() {
         mBinding.loadingIndicator.setVisibility(View.VISIBLE);
         mBinding.newsRecyclerView.setVisibility(View.INVISIBLE);
     }
 
+    /**
+     * Show the RecyclerView and hide the Progressbar
+     */
     private void showResult() {
         mBinding.loadingIndicator.setVisibility(View.INVISIBLE);
         mBinding.newsRecyclerView.setVisibility(View.VISIBLE);
