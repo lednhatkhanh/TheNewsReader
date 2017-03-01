@@ -25,35 +25,39 @@ public class NewsSyncTask {
      * @param context The application context
      */
     synchronized public static void syncNews(Context context) {
-        URL newsRequestUrl = NetworkUtils.getUrl(context);
+        try {
+            URL newsRequestUrl = NetworkUtils.getUrl(context);
 
-        String response = NetworkUtils.getResponseFromUrl(context, newsRequestUrl);
+            String response = NetworkUtils.getResponseFromUrl(context, newsRequestUrl);
 
-        ContentValues[] newsValues = JsonUtils.getContentValuesFromJson(context, response);
+            ContentValues[] newsValues = JsonUtils.getContentValuesFromJson(context, response);
 
-        if(newsValues != null && newsValues.length > 0) {
-            ContentResolver contentResolver = context.getContentResolver();
+            if(newsValues != null && newsValues.length > 0) {
+                ContentResolver contentResolver = context.getContentResolver();
 
-            contentResolver.delete(
-                    NewsContract.NewsEntry.CONTENT_URI,
-                    null,
-                    null);
+                contentResolver.delete(
+                        NewsContract.NewsEntry.CONTENT_URI,
+                        null,
+                        null);
 
-            contentResolver.bulkInsert(NewsContract.NewsEntry.CONTENT_URI, newsValues);
+                contentResolver.bulkInsert(NewsContract.NewsEntry.CONTENT_URI, newsValues);
 
-            boolean notificationsEnabled = PreferencesUtils.areNotificationsEnabled(context);
-            long timeSinceLastNotification = PreferencesUtils
-                    .getElapsedTimeSinceLastNotification(context);
+                boolean notificationsEnabled = PreferencesUtils.areNotificationsEnabled(context);
+                long timeSinceLastNotification = PreferencesUtils
+                        .getElapsedTimeSinceLastNotification(context);
 
-            boolean oneDayPassedSinceLastNotification = false;
+                boolean oneDayPassedSinceLastNotification = false;
 
-            if(timeSinceLastNotification >= DateUtils.DAY_IN_MILLIS) {
-                oneDayPassedSinceLastNotification = true;
+                if(timeSinceLastNotification >= DateUtils.DAY_IN_MILLIS) {
+                    oneDayPassedSinceLastNotification = true;
+                }
+
+                if(notificationsEnabled && oneDayPassedSinceLastNotification) {
+                    NotificationUtils.notifyLatestNews(context);
+                }
             }
-
-            if(notificationsEnabled && oneDayPassedSinceLastNotification) {
-                NotificationUtils.notifyLatestNews(context);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
